@@ -1,6 +1,8 @@
 # LowResolutionFaceRecognition
 Implementation of CosFace, SphereFace, ArcFace, OctupletLoss, DeriveNet and 2 proposed approaches 
-'''bash
+
+## The structure of the repository and data: 
+```bash
 .
 ├── cropped_data
 │   ├── lfw
@@ -57,4 +59,5 @@ Implementation of CosFace, SphereFace, ArcFace, OctupletLoss, DeriveNet and 2 pr
         ├── Octuplet.pt
         └── SphereFace.pt
 
-19 directories, 35 files'''
+19 directories, 35 files
+```
