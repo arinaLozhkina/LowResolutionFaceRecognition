@@ -1,0 +1,16 @@
+LFW:
+    path_model: /home/arina/src/weights/ArcFace.pt
+    path_data: /home/arina/cropped_data/lfw/lfw_crop
+    path_pairs: /home/arina/cropped_data/lfw/pairs.txt
+    target_size: 56
+
+QMUL-SurvFace:
+    path_model: /home/arina/src/weights/ArcFace.pt
+    path_data: /home/arina/cropped_data/qmul/Face_Verification_Test_Set/verification_images
+    path_pairs: /home/arina/cropped_data/qmul/Face_Verification_Test_Set
+
+SCface:
+    path_model: /home/arina/src/weights/Approach2.pt
+    path_data: /home/arina/cropped_data/scface/sc_cropped
+    path_data_gallery: /home/arina/cropped_data/scface/models_croppped
+    scface_dist: 1
