@@ -80,6 +80,8 @@ One of the modern directions is the application of adaptive margin function. The
 - torchvision==0.12.0
 - tqdm==4.64.1
 
+## Weights 
+Weights of pretrained models can be found [on GDrive](https://drive.google.com/file/d/11pkV06g3I6Avwj2lNz8To5_LVyP_MecC/view?usp=sharing).
 
 ## Training 
 The training is implemented for ResNet50-re. There are 5 approaches implemented. 
