@@ -8,7 +8,9 @@ The high resolution facial recognition methods are implemented: CosFace, SphereF
 
 Three low resolution datasets: LFW, SCface, QMUL-SurvFace, and their evaluation protocols are studied and implemented.
 
-One of the modern directions is the application of adaptive margin function. The pro-posed methods are based on it, which adapt margins for images of different quality. The quality of the images is considered using the Laplacian operator. The proposed methods sur-passed the state-of-the-art algorithm of Cross Resolution Face Recognition, AdaFace, when tested on low resolution images.
+One of the modern directions is the application of adaptive margin function. The proposed methods are based on it, which adapt margins for images of different quality. The quality of the images is considered using the Laplacian operator. The proposed methods surpassed the state-of-the-art algorithm of Cross Resolution Face Recognition, AdaFace, when tested on low resolution images. 
+
+Implementation of proposed methods is based on the head AdaptiveArcface and updating the margin value in DataLoader (for Approach 2) and train_epoch function (for Approach 1). 
 
 ## Repository overview
 ```bash
