@@ -211,9 +211,9 @@ class testSCface(object):
     def get_data_identification(self):
         protocol_probes = [elem for elem in os.listdir(self.path_data) if int(elem[-5]) == self.dist and int(elem[-7]) in self.cameras]
         data_loader_probe = torch.utils.data.DataLoader(CommonTestDataset(self.path_data, protocol_probes),
-                                                        batch_size=16, shuffle=False)
+                                                        batch_size=self.batch_size, shuffle=False)
         data_loader_gallery = torch.utils.data.DataLoader(CommonTestDataset(self.path_data_gallery, os.listdir(self.path_data_gallery)),
-                                                  batch_size=16, shuffle=False)
+                                                  batch_size=self.batch_size, shuffle=False)
         return data_loader_probe, data_loader_gallery
 
     def test(self):
