@@ -54,7 +54,6 @@ class CommonTestDataset(Dataset):
         short_image_path = self.image_list[index]
         image_path = os.path.join(self.image_root, short_image_path)
         image = cv2.imdecode(np.fromfile(image_path, dtype=np.uint8), cv2.IMREAD_UNCHANGED)
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         image = square_crop(image) if image.shape[1] != 112 else image
         if self.target_size != 112:
             image = cv2.resize(cv2.resize(image, (self.target_size, self.target_size)), (112, 112))

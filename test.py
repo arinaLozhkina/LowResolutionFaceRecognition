@@ -159,7 +159,7 @@ class testLFW(object):
         self.device = torch.device('cuda:0') if torch.cuda.is_available else torch.device('cpu')
         self.model = FullModel().get_backbone(path=path_model, pretrained=True).to(self.device)
         self.model.eval()
-        self.batch_size = 1
+        self.batch_size = 16
         self.target_size, self.path_data, self.path_pairs = target_size, path_data, path_pairs
         self.path = f"./res/res_{path_model.split('/')[-1]}_{self.target_size}"
         if not os.path.exists(self.path):
