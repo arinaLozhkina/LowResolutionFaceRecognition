@@ -9,10 +9,13 @@ from torch.utils.data import Dataset
 
 sys.path.append("./data")
 
-from data.test_dataset import square_crop
+from data.test_dataset import square_crop, get_sharpness
 
 
 def transform(img):
+    """
+    Augmentation and Normalization of training dataset.
+    """
     if random.random() > 0.5:
         img = cv2.flip(img, 1)
     if img.ndim == 2:
@@ -47,9 +50,3 @@ class ImageDataset(Dataset):
             m = get_sharpness(image)
         image = transform(image)
         return image, image_label, m
-
-
-def get_sharpness(img):
-    laplacian = cv2.Laplacian(img, cv2.CV_64F)
-    gnorm = np.sqrt(laplacian ** 2)
-    return 1 / np.average(gnorm)

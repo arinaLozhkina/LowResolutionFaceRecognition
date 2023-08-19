@@ -6,11 +6,13 @@ In the project the problem of low resolution face recognition is studied includi
 
 The high resolution facial recognition methods are implemented: CosFace, SphereFace and ArcFace. They are also adapted for low resolution face recognition problem using the Cross Resolution Batch training. Also the finetuning methods: Octuplet Loss and DeriveNet are implemented. The implementation of face recognition pipeline based on the existing implementation is included. All methods are tested and compared using low resolution face images.
 
-Three low resolution datasets: LFW, SCface, QMUL-SurvFace, and their evaluation protocols are studied and implemented.
+Three low resolution datasets: LFW, SCface, QMUL-SurvFace, TunyFace and their evaluation protocols are studied and 
+implemented.
 
 One of the modern directions is the application of adaptive margin function. The proposed methods are based on it, which adapt margins for images of different quality. The quality of the images is considered using the Laplacian operator. The proposed methods surpassed the state-of-the-art algorithm of Cross Resolution Face Recognition, AdaFace, when tested on low resolution images. 
 
-Implementation of proposed methods is based on the head AdaptiveArcface and updating the margin value in DataLoader (for Approach 2) and train_epoch function (for Approach 1). 
+Implementation of proposed methods is based on the head AdaptiveArcface and updating the margin value in DataLoader 
+based on the Average Discrete Laplacian. 
 
 ## Repository overview
 ```bash

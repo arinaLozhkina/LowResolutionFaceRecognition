@@ -7,6 +7,9 @@ from torch.utils.data import Dataset
 
 
 def square_crop(im, S=112):
+    """
+    Crops images preserving the proportions of faces by padding if necessary.
+    """
     if im.shape[0] > im.shape[1]:
         height = S
         width = int(float(im.shape[1]) / im.shape[0] * S)
@@ -20,6 +23,9 @@ def square_crop(im, S=112):
 
 
 def get_sharpness(img):
+    """
+    Calculates Discrete Laplacian Norm
+    """
     laplacian = cv2.Laplacian(img, cv2.CV_64F)
     gnorm = np.sqrt(laplacian ** 2)
     return 1 / np.average(gnorm)
@@ -31,6 +37,7 @@ class CommonTestDataset(Dataset):
     Attributes:
         image_root(str): root directory of test set.
         image_list(list): the image list file.
+        target_size(int): the required size of the image.
     """
 
     def __init__(self, image_root, image_list, target_size=112):

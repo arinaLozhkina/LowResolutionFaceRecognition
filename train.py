@@ -13,46 +13,38 @@ from model import FullModel
 
 
 class Training(object):
-    def __init__(self):
+    def __init__(self, loss_type="Approach2", mode="train"):
         super(Training, self).__init__()
-        self.loss_type = "Approach2"  # Type of Head for training from scratch. One of: CosFace, SphereFace, ArcFace, Approach2
+        self.loss_type = loss_type  # Type of Head. One of: CosFace, SphereFace, ArcFace, Approach2
+        self.mode = mode  # train or finetune
         self.weights_path = '/home/arina/LowResolutionFaceRecognition/src/weights_good/Approach2_0_160169.pt'
         self.data_root = '/home/arina/LowResolutionFaceRecognition/cropped_data/webface/casia-112x112'
         self.train_file = '/home/arina/LowResolutionFaceRecognition/cropped_data/webface/train_new.txt'
         self.out_dir = "./weights"
 
+        assert self.mode in ["train", "finetune"]
+        assert self.loss_type in ["CosFace", "SphereFace", "ArcFace", "Approach2"]
+
         self.save_freq = 5000
         self.batch_size = 64
         self.epoch = 20
         self.learning_rate = 0.1
-        self.milestones = [5, 10, 15]
-        self.gamma = 0.5
 
         self.dataset = ImageDataset(self.data_root, self.train_file, self.loss_type)
         self.data_loader = DataLoader(self.dataset, self.batch_size, shuffle=True)
         self.device = torch.device('cuda:0') if torch.cuda.is_available else torch.device('cpu')
 
         self.criterion_cross_entropy = torch.nn.CrossEntropyLoss().to(self.device)
-        self.model = FullModel(feat_dim=512, head_type=self.loss_type, pretrained=False)
+        if self.mode == "finetune":
+            self.model = FullModel(feat_dim=512, head_type=self.loss_type, pretrained=True, path=self.weights_path)
+        else:
+            self.model = FullModel(feat_dim=512, head_type=self.loss_type, pretrained=False)
         self.model = self.model.to(self.device)
         parameters = [p for p in self.model.parameters() if p.requires_grad]
         self.optimizer = optim.SGD(parameters, lr=self.learning_rate,
                                    momentum=0.9, weight_decay=1e-4)
-        # self.optimizer.load_state_dict(torch.load(self.weights_path)['optimizer_state_dict'])
-        self.lr_schedule = optim.lr_scheduler.MultiStepLR(
-            self.optimizer, milestones=self.milestones, gamma=self.gamma)
-
-    def get_margin(self):
-        margins = []
-        bri = []
-        iqa_metric = pyiqa.create_metric('brisque', device=self.device)
-        for batch_idx, (img, label, m) in tqdm(enumerate(self.data_loader)):
-            margins.append(m.cpu().numpy())
-            bri.append(iqa_metric(img).cpu().numpy())
-        with open('margins.npy', 'wb') as f:
-            np.save(f, np.concatenate(margins))
-        with open('bri.npy', 'wb') as f:
-            np.save(f, np.concatenate(bri))
+        if self.mode == "finetune":
+            self.optimizer.load_state_dict(torch.load(self.weights_path)['optimizer_state_dict'])
 
     def train_epoch(self, epoch):
         for batch_idx, (img, label, m) in tqdm(enumerate(self.data_loader)):
@@ -72,7 +64,25 @@ class Training(object):
             print("Epoch:", epoch)
             self.train_epoch(epoch)
 
+    def get_margin(self):
+        """
+        Saves values of margins and image quality metrics using pyiqa to compare and analyse.
+        """
+        margins = []
+        bri = []
+        iqa_metric = pyiqa.create_metric('brisque', device=self.device)
+        for batch_idx, (img, label, m) in tqdm(enumerate(self.data_loader)):
+            margins.append(m.cpu().numpy())
+            bri.append(iqa_metric(img).cpu().numpy())
+        with open('margins.npy', 'wb') as f:
+            np.save(f, np.concatenate(margins))
+        with open('bri.npy', 'wb') as f:
+            np.save(f, np.concatenate(bri))
+
     def extract_features(self):
+        """
+        Saves embeddings with their filenames and margins values to the dictionary.
+        """
         self.model.eval()
         image_name2feature = {"filename": [], "feature": [], "margin": []}
         with torch.no_grad():

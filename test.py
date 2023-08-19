@@ -184,34 +184,27 @@ class testLFW(object):
         print("LFW - Mean:", mean, "Std:", std)
 
     def class_activation_map(self):
+        """
+        Plots Class Activation Maps using torchcam.
+        """
         pairs, data_loader = self.get_data_verification()
         for batch_idx, (images, filenames, m) in tqdm(enumerate(data_loader)):
-            # images[0] = cv2.cvtColor(images[0], cv2.COLOR_BGR2RGB)
             images = images.to(self.device)
-            layers = [f"body.{elem}.res_layer" for elem in range(24)]
             cam_extractor = SmoothGradCAMpp(self.model, "body.23", input_shape=(3, 112, 112))
             features = self.model(images)
             activation_map = cam_extractor(features.squeeze(0).argmax().item(), features)
-            plt.imshow(to_pil_image(images[0]));
-            plt.axis('off');
-            plt.tight_layout();
-            plt.savefig(os.path.join(self.path, f"./results_orig_{batch_idx}.png"));
+            plt.imshow(to_pil_image(images[0]))
+            plt.axis('off')
+            plt.tight_layout()
+            plt.savefig(os.path.join(self.path, f"./results_orig_{batch_idx}.png"))
             result = overlay_mask(to_pil_image(images[0]), to_pil_image(activation_map[0].squeeze(0), mode='F'),
                                   alpha=0.5)
-            plt.imshow(result);
-            plt.axis('off');
-            plt.tight_layout();
-            plt.savefig(os.path.join(self.path, f"./results_{batch_idx}.png"));
+            plt.imshow(result)
+            plt.axis('off')
+            plt.tight_layout()
+            plt.savefig(os.path.join(self.path, f"./results_{batch_idx}.png"))
             if batch_idx > 5:
                 break
-
-    def get_margin(self):
-        margins = []
-        pairs, data_loader = self.get_data_verification()
-        for batch_idx, (images, filenames, m) in tqdm(enumerate(data_loader)):
-            margins = np.append(margins, m.cpu().numpy())
-        with open('margins.npy', 'wb') as f:
-            np.save(f, margins)
 
 
 class testSurvFace(object):
@@ -244,14 +237,6 @@ class testSurvFace(object):
         image_name2feature = extract_features(self.model, data_loader, self.device)
         mean, std = test_one_model(pairs, image_name2feature)
         print("QMUL-SurvFace - Mean:", mean, "Std:", std)
-
-    def get_margin(self):
-        margins = []
-        pairs, data_loader = self.get_data_verification()
-        for batch_idx, (images, filenames, m) in tqdm(enumerate(data_loader)):
-            margins = np.append(margins, m.cpu().numpy())
-        with open('margins.npy', 'wb') as f:
-            np.save(f, margins)
 
 
 class testSCface(object):
@@ -289,9 +274,11 @@ class testSCface(object):
                   probes_features.label.values))
 
     def get_margin(self):
+        """
+        Saves margins for the test dataset.
+        """
         margins = []
         data_loader, _ = self.get_data_identification()
-        # pairs, data_loader = self.get_data_verification()
         for batch_idx, (images, filenames, m) in tqdm(enumerate(data_loader)):
             margins = np.append(margins, m.cpu().numpy())
         with open('margins.npy', 'wb') as f:
@@ -301,7 +288,7 @@ class testSCface(object):
 class testTinyFace(object):
     """
     TinyFace: Face Recognition in Native Low-resolution Imagery
-    https://github.com/mk-minchul/AdaFace/blob/master/validation_lq/validate_tinyface.py
+    Code borrowed from: https://github.com/mk-minchul/AdaFace/blob/master/validation_lq/validate_tinyface.py
     """
 
     def __init__(self, path_model, path_data, alignment_dir_name="aligned_pad_0.1_pad_high"):
@@ -389,18 +376,6 @@ class testTinyFace(object):
         results, _, __ = DIR_FAR(score_mat, label_mat, ranks)
         print("TinyFace results", results)
         return results
-
-    def test_acc(self):
-        data_loader_probe, data_loader_gallery = self.get_data_identification()
-        gallery_features = pd.DataFrame(extract_features(self.model, data_loader_gallery, self.device))
-        probes_features = pd.DataFrame(extract_features(self.model, data_loader_probe, self.device))
-        predictions = np.argmax(np.dot(probes_features.to_numpy().T, gallery_features.to_numpy()), 1)
-        probes_features, gallery_features = probes_features.T, gallery_features.T
-        probes_features["label"] = list(map(lambda k: k[:3], probes_features.index))
-        gallery_features["label"] = list(map(lambda k: k[:3], gallery_features.index))
-        print("TinyFace - Accuracy:",
-              sum(gallery_features.iloc[predictions].label.values == probes_features.label.values) / len(
-                  probes_features.label.values))
 
 
 def inner_product(x1, x2):
@@ -540,13 +515,6 @@ def find_thresholds_by_FAR(score_vec, label_vec, FARs=None, epsilon=1e-5):
 if __name__ == '__main__':
     argParser = argparse.ArgumentParser()
     argParser.add_argument("--dataset", help="Which LR dataset to use: LFW, QMUL-SurvFace, SCface", default="LFW")
-    '''argParser.add_argument("--path_model", help="Path to weights", default='/home/arina/src/weights/ArcFace.pt')
-    argParser.add_argument("--path_data", help="Path to test images", default='/home/arina/cropped_data/lfw/lfw_crop')
-    argParser.add_argument("--path_pairs", help="Path to pairs if using LFW, QMUL-SurvFace", default='/home/arina/cropped_data/lfw/pairs.txt')
-    argParser.add_argument("--path_pairs_negative", help="Path to negative pairs if using QMUL-SurvFace (the path_pairs is for positive pairs)",
-                           default='/home/arina/cropped_data/qmul/Face_Verification_Test_Set/negative_pairs_names.mat')
-    argParser.add_argument("--path_gallery", help="Path to gallery images if using SCface", default='/home/arina/cropped_data/scface/models_croppped')
-    argParser.add_argument("--scface_dist", help="Distance to test SCface", default=1, type=int)'''
     args = argParser.parse_args()
     with open("data_conf.yaml", "r") as stream:
         try:
@@ -555,9 +523,6 @@ if __name__ == '__main__':
             print(exc)
     config = data_conf[args.dataset]
 
-    for target in [112, 14, 7]:
-        testLFW(config['path_model'], config['path_data'], config['path_pairs'], target).class_activation_map()
-    """
     if args.dataset == "LFW":
         testLFW(config['path_model'], config['path_data'], config['path_pairs'], config['target_size']).test()
     elif args.dataset == "TinyFace":
@@ -568,4 +533,3 @@ if __name__ == '__main__':
         testSCface(config['path_model'], config['path_data'], config['path_data_gallery'], dist=config['scface_dist']).test()
     else:
         raise ValueError(f"Wrong dataset: {args.dataset}, choose one of: LFW, QMUL-SurvFace, SCface")
-    """
