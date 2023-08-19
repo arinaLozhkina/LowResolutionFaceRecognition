@@ -1,6 +1,8 @@
 import torch
 
 from resnet import Resnet
+
+#from ada_resnet import build_model
 from head.arcface import ArcFace
 from head.cosface import CosFace
 from head.sphereface import SphereFace
@@ -25,11 +27,20 @@ class FullModel(torch.nn.Module):
             raise ValueError(f"Wrong Head Type: {head_type}")
 
     def get_backbone(self, path=None, pretrained=False):
-        backbone = Resnet(drop_ratio=0.4, mode='ir', feat_dim=self.feat_dim, out_h=7, out_w=7)
+        if path is not None and path.split("/")[-1] == "adaface_ir50_casia.ckpt":
+            backbone = build_model()
+            statedict = torch.load(path)['state_dict']
+            model_statedict = {key[6:]:val for key, val in statedict.items() if key.startswith('model.')}
+            backbone.load_state_dict(model_statedict)
+            return backbone 
+        else:
+            backbone = Resnet(drop_ratio=0.4, mode='ir', feat_dim=self.feat_dim, out_h=7, out_w=7)
         if pretrained:
             assert path is not None
             model_dict = backbone.state_dict()
             pretrained_dict = torch.load(path)['state_dict']
+            #pretrained_dict = {key.replace('model.', 'backbone.'):val
+            #                            for key,val in pretrained_dict.items() if 'model.' in key}
             new_pretrained_dict = {}
             for k in model_dict:
                 if 'backbone.' + k in pretrained_dict.keys():
@@ -47,3 +58,5 @@ class FullModel(torch.nn.Module):
         else:
             pred = self.head.forward(feat, label)
         return pred, feat
+
+

@@ -1,9 +1,6 @@
 import torch.nn
 import torch.nn.functional as F
 
-import torch.nn
-import torch.nn.functional as F
-
 
 class DMargin(torch.nn.Module):
     def __init__(self, feat_dim=512, num_class=10575, device=torch.device("cpu")):
