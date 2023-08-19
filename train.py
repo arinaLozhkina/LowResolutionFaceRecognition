@@ -1,14 +1,12 @@
-import argparse
 import os
 
+import numpy as np
+import pyiqa
 import torch
-import torchvision.transforms as T
+import torch.nn.functional as F
 from torch import optim
 from torch.utils.data import DataLoader
 from tqdm import tqdm
-import torch.nn.functional as F
-import numpy as np
-import pyiqa
 
 from data.training_dataset import ImageDataset
 from model import FullModel
@@ -18,8 +16,6 @@ class Training(object):
     def __init__(self):
         super(Training, self).__init__()
         self.loss_type = "Approach2"  # Type of Head for training from scratch. One of: CosFace, SphereFace, ArcFace, Approach2
-        # self.data_root = '/home/arina/LowResolutionFaceRecognition/cropped_data/qmul/training_set'
-        # self.train_file = '/home/arina/LowResolutionFaceRecognition/cropped_data/qmul/finetune.txt'
         self.weights_path = '/home/arina/LowResolutionFaceRecognition/src/weights_good/Approach2_0_160169.pt'
         self.data_root = '/home/arina/LowResolutionFaceRecognition/cropped_data/webface/casia-112x112'
         self.train_file = '/home/arina/LowResolutionFaceRecognition/cropped_data/webface/train_new.txt'
@@ -69,7 +65,6 @@ class Training(object):
             if (batch_idx + 1) % self.save_freq == 0 or (batch_idx + 1) == len(self.data_loader):
                 torch.save({'state_dict': self.model.state_dict(), 'optimizer_state_dict': self.optimizer.state_dict()},
                            os.path.join(self.out_dir, f'{self.loss_type}_{epoch}_{batch_idx}.pt'))
-        # self.lr_schedule.step()
 
     def train(self):
         self.model.train()
@@ -84,7 +79,6 @@ class Training(object):
             for batch_idx, (images, label, m) in tqdm(enumerate(self.data_loader)):
                 images, label = images.to(self.device), label.to(self.device)
                 em, features = self.model(images, label, m)
-                # print(em.shape, features.shape)
                 features = F.normalize(features)
                 features = features.cpu().numpy()
                 for filename, feature in zip(label, features):
@@ -96,4 +90,3 @@ class Training(object):
 
 if __name__ == '__main__':
     Training().train()
-

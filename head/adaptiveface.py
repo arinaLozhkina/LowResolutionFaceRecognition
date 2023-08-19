@@ -20,7 +20,6 @@ class AdaptiveArcFace(torch.nn.Module):
             y_ = labels.view(-1, 1)
             m = m.view(-1, 1).float()
             m = m.to(torch.device('cuda'))
-            #theta_m.scatter_reduce(1, y_, m, reduce='sum')
             theta_m.scatter_(1, y_, m, reduce='add')
             theta_m.clamp_(1e-5, 3.14159)
             d_theta = torch.cos(theta_m) - cos_theta
