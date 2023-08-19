@@ -183,29 +183,6 @@ class testLFW(object):
         mean, std = test_one_model(pairs, image_name2feature)
         print("LFW - Mean:", mean, "Std:", std)
 
-    def class_activation_map(self):
-        """
-        Plots Class Activation Maps using torchcam.
-        """
-        pairs, data_loader = self.get_data_verification()
-        for batch_idx, (images, filenames, m) in tqdm(enumerate(data_loader)):
-            images = images.to(self.device)
-            cam_extractor = SmoothGradCAMpp(self.model, "body.23", input_shape=(3, 112, 112))
-            features = self.model(images)
-            activation_map = cam_extractor(features.squeeze(0).argmax().item(), features)
-            plt.imshow(to_pil_image(images[0]))
-            plt.axis('off')
-            plt.tight_layout()
-            plt.savefig(os.path.join(self.path, f"./results_orig_{batch_idx}.png"))
-            result = overlay_mask(to_pil_image(images[0]), to_pil_image(activation_map[0].squeeze(0), mode='F'),
-                                  alpha=0.5)
-            plt.imshow(result)
-            plt.axis('off')
-            plt.tight_layout()
-            plt.savefig(os.path.join(self.path, f"./results_{batch_idx}.png"))
-            if batch_idx > 5:
-                break
-
 
 class testSurvFace(object):
     def __init__(self, path_model, path_data, path_pairs):
